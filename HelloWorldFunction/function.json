@@ -1,11 +1,18 @@
-{  
-  "bindings": [  
-    {  
-      "type": "httpTrigger",  
-      "direction": "in",  
-      "authLevel": "anonymous",  
-      "methods": ["get"],  
-      "route": "HelloWorldFunction"  
-    }  
-  ]  
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "authLevel": "anonymous",
+      "type": "httpTrigger",
+      "direction": "in",
+      "name": "req",
+      "methods": ["get"],
+      "route": "HelloWorldFunction"
+    },
+    {
+      "type": "http",
+      "direction": "out",
+      "name": "$return"
+    }
+  ]
 }
