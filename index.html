@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Liga SaaS</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+  .app{display:flex;min-height:100vh}
+  .sidebar{width:220px;background:#1e293b;padding:24px 0;flex-shrink:0}
+  .sidebar-logo{padding:0 20px 24px;border-bottom:1px solid #334155}
+  .sidebar-logo h1{font-size:22px;font-weight:800;color:#38bdf8}
+  .sidebar-logo p{font-size:11px;color:#64748b;margin-top:2px}
+  .sidebar-user{padding:14px 20px;border-bottom:1px solid #334155;font-size:12px}
+  .sidebar-user .uname{color:#e2e8f0;font-weight:600}
+  .sidebar-user .urole{color:#64748b;margin-top:2px}
+  .sidebar-user .tenant{color:#38bdf8;margin-top:2px;font-size:11px}
+  .nav{padding:12px 0}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;color:#94a3b8;font-size:14px;transition:all .15s}
+  .nav-item:hover{background:#273449;color:#e2e8f0}
+  .nav-item.active{background:#1d4ed8;color:#fff;font-weight:600}
+  .nav-icon{font-size:16px;width:20px;text-align:center}
+  .nav-section{padding:14px 20px 6px;font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:1px}
+  .logout-btn{margin:16px 20px 0;padding:8px 14px;background:#1e293b;border:1px solid #334155;border-radius:8px;color:#94a3b8;font-size:13px;cursor:pointer;width:calc(100% - 40px);text-align:left}
+  .logout-btn:hover{background:#334155;color:#e2e8f0}
+  .main{flex:1;padding:32px;overflow-y:auto}
+  .page-title{font-size:26px;font-weight:700;margin-bottom:6px}
+  .page-sub{color:#64748b;font-size:14px;margin-bottom:28px}
+  .highlight{background:linear-gradient(135deg,#1d4ed8,#0ea5e9);border-radius:12px;padding:24px;margin-bottom:20px}
+  .hl-label{font-size:11px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px}
+  .hl-name{font-size:28px;font-weight:800;color:#fff;margin:6px 0 4px}
+  .hl-sub{font-size:13px;color:rgba(255,255,255,.7)}
+  .hl-badge{display:inline-block;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:13px;color:#fff;margin-top:10px}
+  .table-wrap{background:#1e293b;border-radius:12px;border:1px solid #334155;overflow:hidden;margin-bottom:20px}
+  .table-head{padding:16px 20px;border-bottom:1px solid #334155;display:flex;justify-content:space-between;align-items:center}
+  .table-head h3{font-size:15px;font-weight:600}
+  table{width:100%;border-collapse:collapse}
+  th{padding:10px 16px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #334155}
+  td{padding:12px 16px;font-size:14px;border-bottom:1px solid #1e293b}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#273449}
+  .rank{font-weight:700;color:#64748b;width:30px}
+  .rank-1{color:#f59e0b}.rank-2{color:#94a3b8}.rank-3{color:#b45309}
+  .pts{font-weight:700;color:#38bdf8}
+  .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600}
+  .badge-fw{background:#dc262620;color:#f87171}
+  .badge-mf{background:#2563eb20;color:#60a5fa}
+  .badge-df{background:#16a34a20;color:#4ade80}
+  .badge-gk{background:#92400e20;color:#fbbf24}
+  .goals-cell{color:#f59e0b;font-weight:700}
+  .form-wrap{background:#1e293b;border-radius:12px;border:1px solid #334155;padding:24px;margin-bottom:20px}
+  .form-wrap h3{font-size:15px;font-weight:600;margin-bottom:16px}
+  .form-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .form-group{display:flex;flex-direction:column;gap:6px;flex:1;min-width:140px}
+  label{font-size:12px;color:#94a3b8}
+  input,select{background:#0f172a;border:1px solid #334155;border-radius:8px;padding:8px 12px;color:#e2e8f0;font-size:14px;outline:none;width:100%}
+  input:focus,select:focus{border-color:#38bdf8}
+  .btn{padding:9px 20px;border-radius:8px;border:none;cursor:pointer;font-size:14px;font-weight:600;transition:all .15s}
+  .btn-primary{background:#1d4ed8;color:#fff}
+  .btn-primary:hover{background:#1e40af}
+  .btn-sm{padding:5px 12px;font-size:12px;border-radius:6px;border:none;cursor:pointer;font-weight:600;background:#1d4ed8;color:#fff}
+  .btn-sm:hover{background:#1e40af}
+  .score-input{width:50px;text-align:center}
+  .scorers{font-size:11px;color:#64748b;margin-top:2px}
+  .toast{position:fixed;bottom:24px;right:24px;background:#16a34a;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;z-index:999;animation:slideIn .3s ease}
+  @keyframes slideIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .empty{text-align:center;padding:40px;color:#475569;font-size:14px}
+  .loading{text-align:center;padding:40px;color:#64748b}
+  /* LOGIN */
+  .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#0f172a}
+  .login-box{background:#1e293b;border:1px solid #334155;border-radius:16px;padding:40px;width:380px}
+  .login-box h1{font-size:28px;font-weight:800;color:#38bdf8;margin-bottom:4px}
+  .login-box p{color:#64748b;font-size:13px;margin-bottom:28px}
+  .login-field{margin-bottom:14px}
+  .login-field label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}
+  .login-field input{width:100%}
+  .login-btn{width:100%;padding:11px;background:#1d4ed8;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;margin-top:8px}
+  .login-btn:hover{background:#1e40af}
+  .login-err{color:#f87171;font-size:13px;margin-top:10px;text-align:center}
+  .login-hint{margin-top:20px;padding:14px;background:#0f172a;border-radius:8px;font-size:12px;color:#64748b}
+  .login-hint strong{color:#94a3b8;display:block;margin-bottom:6px}
+  .login-hint code{color:#38bdf8}
+  .admin-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#1d4ed820;color:#60a5fa;margin-left:6px}
+  .fan-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;background:#16a34a20;color:#4ade80;margin-left:6px}
+  .fr3-row{display:flex;gap:12px;align-items:flex-end;margin-bottom:20px}
+  .vs{color:#64748b;font-size:13px;align-self:center}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const API = "https://liga-api.azurewebsites.net";
+
+// ── Auth context ──────────────────────────────────────────────────────────
+const AuthCtx = React.createContext(null);
+
+function useAuth() { return React.useContext(AuthCtx); }
+
+function useApi(url, token, deps = []) {
+  const [data, setData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const refresh = React.useCallback(() => {
+    if (!token) return;
+    setLoading(true);
+    fetch(API + url, { headers: { Authorization: `Bearer ${token}` } })
+      .then(r => r.json()).then(d => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [url, token]);
+  React.useEffect(() => { refresh(); }, [refresh, ...deps]);
+  return { data, loading, refresh };
+}
+
+function Toast({ msg, onDone }) {
+  React.useEffect(() => { const t = setTimeout(onDone, 2500); return () => clearTimeout(t); }, []);
+  return <div className="toast">✓ {msg}</div>;
+}
+
+// ── LOGIN ─────────────────────────────────────────────────────────────────
+function Login({ onLogin }) {
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [err, setErr] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+
+  const submit = async () => {
+    setErr(""); setLoading(true);
+    const body = new URLSearchParams({ username, password });
+    const r = await fetch(`${API}/auth/login`, { method: "POST", body });
+    const data = await r.json();
+    setLoading(false);
+    if (!r.ok) { setErr(data.detail || "Błąd logowania"); return; }
+    onLogin({ token: data.access_token, role: data.role, tenant_id: data.tenant_id, username });
+  };
+
+  return (
+    <div className="login-wrap">
+      <div className="login-box">
+        <h1>⚽ Liga SaaS</h1>
+        <p>System informatyczny ligi piłkarskiej</p>
+        <div className="login-field">
+          <label>Nazwa użytkownika</label>
+          <input value={username} onChange={e=>setUsername(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="admin" autoFocus/>
+        </div>
+        <div className="login-field">
+          <label>Hasło</label>
+          <input type="password" value={password} onChange={e=>setPassword(e.target.value)}
+            onKeyDown={e=>e.key==="Enter"&&submit()} placeholder="••••••••"/>
+        </div>
+        <button className="login-btn" onClick={submit} disabled={loading}>
+          {loading ? "Logowanie..." : "Zaloguj się"}
+        </button>
+        {err && <div className="login-err">{err}</div>}
+        <div className="login-hint">
+          <strong>Konta testowe:</strong>
+          <div><code>admin / admin123</code> — League Admin (pełny dostęp)</div>
+          <div><code>fan / fan123</code> — Fan (tylko podgląd)</div>
+          <div style={{marginTop:6}}><code>admin2 / admin123</code> — Segunda Liga (izolowany tenant)</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── DASHBOARD ─────────────────────────────────────────────────────────────
+function Dashboard() {
+  const { token } = useAuth();
+  const { data: standings, loading } = useApi("/api/standings", token);
+  const { data: bestTeam } = useApi("/api/best-team", token);
+  const { data: bestScorer } = useApi("/api/best-scorer", token);
+  const { data: league } = useApi("/api/league", token);
+
+  return (
+    <div>
+      <div className="page-title">Dashboard</div>
+      <div className="page-sub">{league?.name} · Sezon {league?.season}</div>
+
+      {bestTeam && (
+        <div className="highlight">
+          <div className="hl-label">🏆 FR1 — Najlepsza drużyna</div>
+          <div className="hl-name">{bestTeam.name}</div>
+          <div className="hl-sub">{bestTeam.city}</div>
+          <div className="hl-badge">{bestTeam.points} pkt · {bestTeam.wins}W {bestTeam.draws}R {bestTeam.losses}P</div>
+        </div>
+      )}
+
+      {bestScorer && (
+        <div className="highlight" style={{background:"linear-gradient(135deg,#7c3aed,#0ea5e9)"}}>
+          <div className="hl-label">⚽ FR2 — Najlepszy strzelec</div>
+          <div className="hl-name">{bestScorer.first_name} {bestScorer.last_name}</div>
+          <div className="hl-sub">{bestScorer.team_name} · #{bestScorer.shirt_number} · {bestScorer.position}</div>
+          <div className="hl-badge">{bestScorer.goals} bramki</div>
+        </div>
+      )}
+
+      <div className="table-wrap">
+        <div className="table-head"><h3>Tabela wyników</h3></div>
+        {loading ? <div className="loading">Ładowanie...</div> : (
+          <table>
+            <thead><tr><th>#</th><th>Drużyna</th><th>M</th><th>W</th><th>R</th><th>P</th><th>Pkt</th></tr></thead>
+            <tbody>
+              {standings?.map((t,i) => (
+                <tr key={t.team_id}>
+                  <td className={`rank rank-${i+1}`}>{i+1}</td>
+                  <td><strong>{t.name}</strong><div style={{fontSize:11,color:'#64748b'}}>{t.city}</div></td>
+                  <td>{t.wins+t.draws+t.losses}</td>
+                  <td>{t.wins}</td><td>{t.draws}</td><td>{t.losses}</td>
+                  <td className="pts">{t.points}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── FR3 ──────────────────────────────────────────────────────────────────
+function BestVsTeam() {
+  const { token } = useAuth();
+  const { data: teams } = useApi("/api/teams", token);
+  const [selected, setSelected] = React.useState("");
+  const [result, setResult] = React.useState(undefined);
+  const [loading, setLoading] = React.useState(false);
+
+  const search = () => {
+    if (!selected) return;
+    setLoading(true); setResult(undefined);
+    fetch(`${API}/api/best-player-vs-team/${selected}`, { headers:{Authorization:`Bearer ${token}`} })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { setResult(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  };
+
+  return (
+    <div>
+      <div className="page-title">FR3 — Najlepszy zawodnik vs drużyna</div>
+      <div className="page-sub">Który zawodnik strzelił najwięcej bramek przeciwko wybranej drużynie?</div>
+      <div className="form-wrap">
+        <h3>Wybierz drużynę przeciwnika</h3>
+        <div className="fr3-row">
+          <div className="form-group">
+            <label>Drużyna przeciwnika</label>
+            <select value={selected} onChange={e=>{setSelected(e.target.value);setResult(undefined);}}>
+              <option value="">-- wybierz --</option>
+              {teams?.map(t=><option key={t.team_id} value={t.team_id}>{t.name}</option>)}
+            </select>
+          </div>
+          <button className="btn btn-primary" onClick={search} disabled={!selected}>Szukaj</button>
+        </div>
+      </div>
+      {loading && <div className="loading">Szukam...</div>}
+      {result && (
+        <div className="highlight" style={{background:"linear-gradient(135deg,#be185d,#7c3aed)"}}>
+          <div className="hl-label">⚽ Najlepszy vs {teams?.find(t=>t.team_id==selected)?.name}</div>
+          <div className="hl-name">{result.first_name} {result.last_name}</div>
+          <div className="hl-sub">{result.team_name} · #{result.shirt_number} · {result.position}</div>
+          <div className="hl-badge">{result.goals} bramki przeciwko tej drużynie</div>
+        </div>
+      )}
+      {result === null && !loading && selected && <div className="empty">Brak bramek przeciwko tej drużynie</div>}
+    </div>
+  );
+}
+
+// ── MECZE ─────────────────────────────────────────────────────────────────
+function Matches({ toast }) {
+  const { token, role } = useAuth();
+  const { data: matches, loading, refresh } = useApi("/api/matches", token);
+  const { data: teams } = useApi("/api/teams", token);
+  const [scores, setScores] = React.useState({});
+  const [nm, setNm] = React.useState({home_team_id:"",away_team_id:"",venue:""});
+  const isAdmin = role === "admin";
+
+  const submitResult = async (matchId) => {
+    const s = scores[matchId];
+    if (s?.home===undefined||s?.away===undefined) return;
+    await fetch(`${API}/api/match/result`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},
+      body:JSON.stringify({match_id:matchId,home_score:parseInt(s.home),away_score:parseInt(s.away)})});
+    toast("Wynik zapisany, tabela zaktualizowana!"); refresh();
+  };
+
+  const addMatch = async () => {
+    if(!nm.home_team_id||!nm.away_team_id) return;
+    await fetch(`${API}/api/match`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},
+      body:JSON.stringify({home_team_id:parseInt(nm.home_team_id),away_team_id:parseInt(nm.away_team_id),venue:nm.venue||null})});
+    toast("Mecz dodany!"); setNm({home_team_id:"",away_team_id:"",venue:""}); refresh();
+  };
+
+  return (
+    <div>
+      <div className="page-title">Mecze</div>
+      <div className="page-sub">
+        {isAdmin ? "Zarządzaj meczami i wprowadzaj wyniki" : "Podgląd meczów — wyniki wprowadza Admin"}
+      </div>
+
+      {isAdmin && (
+        <div className="form-wrap">
+          <h3>Dodaj mecz</h3>
+          <div className="form-row">
+            <div className="form-group"><label>Gospodarz</label>
+              <select value={nm.home_team_id} onChange={e=>setNm({...nm,home_team_id:e.target.value})}>
+                <option value="">-- wybierz --</option>
+                {teams?.map(t=><option key={t.team_id} value={t.team_id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label>Gość</label>
+              <select value={nm.away_team_id} onChange={e=>setNm({...nm,away_team_id:e.target.value})}>
+                <option value="">-- wybierz --</option>
+                {teams?.map(t=><option key={t.team_id} value={t.team_id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label>Miejsce</label>
+              <input placeholder="Stadion..." value={nm.venue} onChange={e=>setNm({...nm,venue:e.target.value})}/>
+            </div>
+            <div className="form-group" style={{justifyContent:'flex-end'}}>
+              <button className="btn btn-primary" onClick={addMatch}>Dodaj</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="table-wrap">
+        <div className="table-head"><h3>Lista meczów</h3></div>
+        {loading ? <div className="loading">Ładowanie...</div> : (
+          <table>
+            <thead><tr><th>Gospodarz</th><th>Gość</th><th>Wynik</th><th>Miejsce</th>{isAdmin&&<th>Akcja</th>}</tr></thead>
+            <tbody>
+              {matches?.map(m=>(
+                <tr key={m.match_id}>
+                  <td><strong>{m.home_team}</strong></td>
+                  <td><strong>{m.away_team}</strong></td>
+                  <td>
+                    {m.home_score!==null
+                      ? <strong style={{color:'#38bdf8'}}>{m.home_score} : {m.away_score}</strong>
+                      : isAdmin
+                        ? <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                            <input className="score-input" type="number" min="0" placeholder="0"
+                              value={scores[m.match_id]?.home??""}
+                              onChange={e=>setScores(s=>({...s,[m.match_id]:{...s[m.match_id],home:e.target.value}}))}/>
+                            <span className="vs">:</span>
+                            <input className="score-input" type="number" min="0" placeholder="0"
+                              value={scores[m.match_id]?.away??""}
+                              onChange={e=>setScores(s=>({...s,[m.match_id]:{...s[m.match_id],away:e.target.value}}))}/>
+                          </div>
+                        : <span style={{color:'#475569'}}>brak wyniku</span>
+                    }
+                    {m.scorers?.length>0&&<div className="scorers">{m.scorers.join(", ")}</div>}
+                  </td>
+                  <td style={{color:'#64748b',fontSize:13}}>{m.venue||"—"}</td>
+                  {isAdmin&&<td>{m.home_score===null&&<button className="btn-sm" onClick={()=>submitResult(m.match_id)}>Zapisz</button>}</td>}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── ZAWODNICY ─────────────────────────────────────────────────────────────
+function Players({ toast }) {
+  const { token, role } = useAuth();
+  const { data: players, loading, refresh } = useApi("/api/players", token);
+  const { data: teams } = useApi("/api/teams", token);
+  const { data: matches } = useApi("/api/matches", token);
+  const [form, setForm] = React.useState({first_name:"",last_name:"",position:"FW",shirt_number:"",team_id:""});
+  const [gf, setGf] = React.useState({match_id:"",player_id:"",minute:"",is_penalty:false});
+  const isAdmin = role === "admin";
+
+  const addPlayer = async () => {
+    if(!form.first_name||!form.last_name||!form.team_id) return;
+    await fetch(`${API}/api/player`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},
+      body:JSON.stringify({...form,shirt_number:form.shirt_number?parseInt(form.shirt_number):null,team_id:parseInt(form.team_id)})});
+    toast("Zawodnik dodany!"); setForm({first_name:"",last_name:"",position:"FW",shirt_number:"",team_id:""}); refresh();
+  };
+
+  const addGoal = async () => {
+    if(!gf.match_id||!gf.player_id) return;
+    await fetch(`${API}/api/goal`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},
+      body:JSON.stringify({...gf,match_id:parseInt(gf.match_id),player_id:parseInt(gf.player_id),minute:gf.minute?parseInt(gf.minute):null})});
+    toast("Bramka dodana!"); setGf({match_id:"",player_id:"",minute:"",is_penalty:false}); refresh();
+  };
+
+  return (
+    <div>
+      <div className="page-title">Zawodnicy</div>
+      <div className="page-sub">Ranking strzelców{isAdmin?" — możesz dodawać zawodników i bramki":""}</div>
+
+      {isAdmin && <>
+        <div className="form-wrap">
+          <h3>Dodaj zawodnika</h3>
+          <div className="form-row">
+            <div className="form-group"><label>Imię</label><input value={form.first_name} onChange={e=>setForm({...form,first_name:e.target.value})}/></div>
+            <div className="form-group"><label>Nazwisko</label><input value={form.last_name} onChange={e=>setForm({...form,last_name:e.target.value})}/></div>
+            <div className="form-group"><label>Pozycja</label>
+              <select value={form.position} onChange={e=>setForm({...form,position:e.target.value})}>
+                <option>FW</option><option>MF</option><option>DF</option><option>GK</option>
+              </select>
+            </div>
+            <div className="form-group"><label>Numer</label><input type="number" value={form.shirt_number} onChange={e=>setForm({...form,shirt_number:e.target.value})}/></div>
+            <div className="form-group"><label>Drużyna</label>
+              <select value={form.team_id} onChange={e=>setForm({...form,team_id:e.target.value})}>
+                <option value="">-- wybierz --</option>
+                {teams?.map(t=><option key={t.team_id} value={t.team_id}>{t.name}</option>)}
+              </select>
+            </div>
+            <div className="form-group" style={{justifyContent:'flex-end'}}><button className="btn btn-primary" onClick={addPlayer}>Dodaj</button></div>
+          </div>
+        </div>
+
+        <div className="form-wrap">
+          <h3>Dodaj bramkę</h3>
+          <div className="form-row">
+            <div className="form-group"><label>Mecz</label>
+              <select value={gf.match_id} onChange={e=>setGf({...gf,match_id:e.target.value})}>
+                <option value="">-- wybierz --</option>
+                {matches?.map(m=><option key={m.match_id} value={m.match_id}>{m.home_team} vs {m.away_team}</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label>Zawodnik</label>
+              <select value={gf.player_id} onChange={e=>setGf({...gf,player_id:e.target.value})}>
+                <option value="">-- wybierz --</option>
+                {players?.map(p=><option key={p.player_id} value={p.player_id}>{p.first_name} {p.last_name} ({p.team_name})</option>)}
+              </select>
+            </div>
+            <div className="form-group"><label>Minuta</label><input type="number" value={gf.minute} onChange={e=>setGf({...gf,minute:e.target.value})}/></div>
+            <div className="form-group" style={{justifyContent:'flex-end'}}>
+              <label style={{display:'flex',gap:6,alignItems:'center',cursor:'pointer'}}>
+                <input type="checkbox" checked={gf.is_penalty} onChange={e=>setGf({...gf,is_penalty:e.target.checked})}/> Karny
+              </label>
+              <button className="btn btn-primary" style={{marginTop:8}} onClick={addGoal}>Dodaj</button>
+            </div>
+          </div>
+        </div>
+      </>}
+
+      <div className="table-wrap">
+        <div className="table-head"><h3>Ranking strzelców</h3></div>
+        {loading ? <div className="loading">Ładowanie...</div> : (
+          <table>
+            <thead><tr><th>#</th><th>Zawodnik</th><th>Poz.</th><th>Nr</th><th>Drużyna</th><th>Gole</th></tr></thead>
+            <tbody>
+              {players?.map((p,i)=>(
+                <tr key={p.player_id}>
+                  <td className={`rank rank-${i+1}`}>{i+1}</td>
+                  <td><strong>{p.first_name} {p.last_name}</strong></td>
+                  <td><span className={`badge badge-${(p.position||'').toLowerCase()}`}>{p.position}</span></td>
+                  <td style={{color:'#64748b'}}>#{p.shirt_number}</td>
+                  <td style={{color:'#94a3b8'}}>{p.team_name}</td>
+                  <td className="goals-cell">⚽ {p.goals}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────────────────────
+function App() {
+  const [auth, setAuth] = React.useState(null);
+  const [page, setPage] = React.useState("dashboard");
+  const [toastMsg, setToastMsg] = React.useState(null);
+  const toast = msg => setToastMsg(msg);
+
+  const handleLogin = (data) => { setAuth(data); setPage("dashboard"); };
+  const handleLogout = () => { setAuth(null); setPage("dashboard"); };
+
+  if (!auth) return <Login onLogin={handleLogin}/>;
+
+  const pages = {
+    dashboard: <Dashboard/>,
+    fr3: <BestVsTeam/>,
+    matches: <Matches toast={toast}/>,
+    players: <Players toast={toast}/>,
+  };
+
+  return (
+    <AuthCtx.Provider value={auth}>
+      <div className="app">
+        <div className="sidebar">
+          <div className="sidebar-logo">
+            <h1>⚽ Liga SaaS</h1>
+            <p>Multi-tenant · Azure</p>
+          </div>
+          <div className="sidebar-user">
+            <div className="uname">{auth.username}
+              {auth.role==="admin"
+                ? <span className="admin-badge">admin</span>
+                : <span className="fan-badge">fan</span>}
+            </div>
+            <div className="tenant">Tenant #{auth.tenant_id}</div>
+          </div>
+          <nav className="nav">
+            <div className="nav-section">Statystyki</div>
+            {[["dashboard","🏠","Dashboard / FR1 & FR2"],["fr3","🎯","FR3 — vs drużyna"]].map(([id,icon,label])=>(
+              <div key={id} className={`nav-item ${page===id?"active":""}`} onClick={()=>setPage(id)}>
+                <span className="nav-icon">{icon}</span>{label}
+              </div>
+            ))}
+            <div className="nav-section">Zarządzanie</div>
+            {[["matches","📋","Mecze"],["players","👤","Zawodnicy"]].map(([id,icon,label])=>(
+              <div key={id} className={`nav-item ${page===id?"active":""}`} onClick={()=>setPage(id)}>
+                <span className="nav-icon">{icon}</span>{label}
+              </div>
+            ))}
+          </nav>
+          <button className="logout-btn" onClick={handleLogout}>⬅ Wyloguj</button>
+        </div>
+        <div className="main">{pages[page]}</div>
+        {toastMsg && <Toast msg={toastMsg} onDone={()=>setToastMsg(null)}/>}
+      </div>
+    </AuthCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
